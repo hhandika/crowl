@@ -65,7 +65,7 @@ impl<'a> Md5<'a> {
             let lines = file::parse_file(&path);
             lines.iter().for_each(|line| {
                 let md5 = line.split_whitespace().collect::<Vec<&str>>();
-                md5s.insert(md5[0].to_string(), md5[1].to_string());
+                md5s.insert(md5[1].to_string(), md5[0].to_string());
             });
         });
 
