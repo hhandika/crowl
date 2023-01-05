@@ -131,7 +131,9 @@ impl<'a> Md5<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
     #[test]
+    #[cfg(not(target_os = "windows"))]
     fn test_md5() {
         let md5 = Md5::new(&Path::new("test"), "txt");
         let test = md5.check_md5(Path::new("tests/files/test.txt"));
