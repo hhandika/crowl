@@ -11,3 +11,4 @@ clap = { version = "4.*", features = ["cargo", "derive"] }
 regex = "1.*"
 lazy_static = "1.*"
 glob = "0.*"
+rayon = "1.*"

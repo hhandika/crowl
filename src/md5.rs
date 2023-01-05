@@ -1,8 +1,10 @@
+use rayon::prelude::*;
 use std::collections::HashMap;
 use std::iter;
 use std::path::Path;
 use std::process::Command;
 use std::str;
+use std::sync::atomic::AtomicI32;
 
 use crate::file;
 
@@ -27,37 +29,51 @@ impl<'a> Md5<'a> {
     }
 
     pub fn match_md5(&self) {
-        let file_md5 = self.collect_md5();
-        let input_md5 = self.parse_supplied_md5();
+        let origin_md5 = self.parse_supplied_md5();
+        println!("MD5 supplied files: {}", origin_md5.len());
         let divider = iter::repeat('-').take(50).collect::<String>();
         println!("{}", divider);
-        input_md5.iter().for_each(|(k, v)| {
-            if let Some(md5) = file_md5.get(k) {
-                if md5 == v {
-                    println!("{}: OK", k);
-                } else {
-                    println!("{}: FAIL", k);
-                }
-            } else {
-                println!("{}: {}: NOT FOUND", k, v);
-            }
-        });
+        self.collect_md5(&origin_md5);
     }
 
-    fn collect_md5(&self) -> HashMap<String, String> {
+    fn collect_md5(&self, origin_md5: &HashMap<String, String>) {
         let paths = file::find_files(&self.regex);
-        paths.iter().for_each(|path| {
-            println!("File founds {:?}", path);
-        });
-        let mut md5s = HashMap::new();
-        paths.iter().for_each(|path| {
+        let success_count = AtomicI32::new(0);
+        let failed_count = AtomicI32::new(0);
+        let not_found_count = AtomicI32::new(0);
+        paths.par_iter().for_each(|path| {
             let md5 = self.check_md5(&path);
 
             let fname = path.file_name().unwrap().to_string_lossy().to_string();
-            md5s.insert(fname, md5);
+            if let Some(origin_md5) = origin_md5.get(&fname) {
+                if origin_md5.to_string() == md5 {
+                    println!("{}: OK", fname);
+                    success_count.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                } else {
+                    println!("{}: FAIL", fname);
+                    failed_count.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                }
+            } else {
+                println!("Path {}: MD5 {}: NOT FOUND", fname, md5);
+                not_found_count.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            }
         });
-
-        md5s
+        println!(
+            "{}: {}",
+            "SUCCESS",
+            success_count.load(std::sync::atomic::Ordering::Relaxed)
+        );
+        println!(
+            "{}: {}",
+            "FAILED",
+            failed_count.load(std::sync::atomic::Ordering::Relaxed)
+        );
+        println!(
+            "{}: {}",
+            "NOT FOUND",
+            not_found_count.load(std::sync::atomic::Ordering::Relaxed)
+        );
+        println!("DONE");
     }
 
     fn check_md5(&self, path: &Path) -> String {
