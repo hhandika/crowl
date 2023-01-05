@@ -26,7 +26,7 @@ impl<'a> Md5<'a> {
                     println!("{}: FAIL", k);
                 }
             } else {
-                println!("{}: NOT FOUND", k);
+                println!("{}: {}: NOT FOUND", k, v);
             }
         });
     }
