@@ -81,7 +81,7 @@ impl<'a> Md5<'a> {
     }
 
     fn check_md5_windows(&self, path: &Path) -> String {
-        let output = Command::new("certutil")
+        let output = Command::new("certutil.exe")
             .arg("-hashfile")
             .arg(path)
             .arg("MD5")
@@ -135,6 +135,14 @@ mod tests {
     fn test_md5() {
         let md5 = Md5::new(&Path::new("test"), "txt");
         let test = md5.check_md5(Path::new("tests/files/test.txt"));
+        assert_eq!("d41d8cd98f00b204e9800998ecf8427e", test);
+    }
+
+    #[test]
+    #[cfg(target_os = "windows")]
+    fn test_md5_windows() {
+        let md5 = Md5::new(&Path::new("test"), "txt");
+        let test = md5.check_md5_windows(Path::new("tests/files/test.txt"));
         assert_eq!("d41d8cd98f00b204e9800998ecf8427e", test);
     }
 }
