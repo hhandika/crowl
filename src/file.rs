@@ -9,6 +9,8 @@ pub fn parse_file(input: &Path) -> Vec<String> {
     let file = File::open(input).unwrap();
     let reader = BufReader::new(file);
     let mut lines = Vec::new();
+    let divider = str::repeat("-", 80);
+    println!("{}", divider);
     reader
         .lines()
         .filter_map(|line| line.ok())
@@ -46,19 +48,15 @@ pub fn find_files(regex: &str) -> Vec<PathBuf> {
         .filter_map(|ok| ok.ok())
         .filter(|e| e.file_type().is_file())
         .for_each(|e| {
-            let ext = match e.path().extension() {
-                Some(ext) => ext,
-                None => return,
-            };
-
-            if re_match_lazy(regex, &ext.to_string_lossy()) {
+            let fname = e.file_name().to_string_lossy();
+            if re_match_lazy(regex, &fname) {
                 fnames.push(PathBuf::from(e.path()));
             }
         });
     fnames
 }
 
-fn re_match_lazy(regex: &str, extension: &str) -> bool {
+fn re_match_lazy(regex: &str, fname: &str) -> bool {
     let re = regex::Regex::new(regex).unwrap();
-    re.is_match(extension)
+    re.is_match(fname)
 }

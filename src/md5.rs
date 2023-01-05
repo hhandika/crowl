@@ -5,6 +5,16 @@ use std::str;
 
 use crate::file;
 
+pub fn run_md5sum(input: &Path) {
+    let output = Command::new("md5sum")
+        .arg(input)
+        .output()
+        .expect("failed to execute process");
+    println!("status: {}", output.status);
+    println!("stdout: {}", str::from_utf8(&output.stdout).unwrap());
+    println!("stderr: {}", str::from_utf8(&output.stderr).unwrap());
+}
+
 pub struct Md5<'a> {
     pub input: &'a Path,
     pub regex: &'a str,
@@ -33,9 +43,13 @@ impl<'a> Md5<'a> {
 
     fn collect_md5(&self) -> HashMap<String, String> {
         let paths = file::find_files(&self.regex);
+        paths.iter().for_each(|path| {
+            println!("File founds {:?}", path);
+        });
         let mut md5s = HashMap::new();
         paths.iter().for_each(|path| {
             let md5 = self.check_md5(&path);
+
             let fname = path.file_name().unwrap().to_string_lossy().to_string();
             md5s.insert(fname, md5);
         });
@@ -70,5 +84,16 @@ impl<'a> Md5<'a> {
         });
 
         md5s
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_md5() {
+        let md5 = Md5::new(&Path::new("test"), "txt");
+        let test = md5.check_md5(Path::new("tests/files/test.txt"));
+        assert_eq!("d41d8cd98f00b204e9800998ecf8427e", test);
     }
 }

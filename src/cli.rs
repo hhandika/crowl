@@ -2,7 +2,7 @@ use clap::{Parser, Subcommand};
 use std::path::Path;
 
 use crate::file;
-use crate::md5::Md5;
+use crate::md5;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about)]
@@ -37,6 +37,16 @@ enum Commands {
         )]
         regex: String,
     },
+
+    Test {
+        #[arg(
+            long = "input",
+            short = 'i',
+            value_name = "PATH",
+            help = "File to check"
+        )]
+        input: String,
+    },
 }
 
 pub fn parse_cli() {
@@ -46,7 +56,10 @@ pub fn parse_cli() {
             file::walk_dir(&regex);
         }
         Commands::MD5 { input, regex } => {
-            Md5::new(Path::new(&input), &regex).match_md5();
+            md5::Md5::new(Path::new(&input), &regex).match_md5();
+        }
+        Commands::Test { input } => {
+            md5::run_md5sum(Path::new(&input));
         }
     }
 }
