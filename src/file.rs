@@ -10,7 +10,7 @@ pub fn parse_file(input: &Path) -> Vec<String> {
     let file = File::open(input).unwrap();
     let reader = BufReader::new(file);
     let mut lines = Vec::new();
-    let divider = iter::repeat('-').take(80).collect::<String>();
+    let divider = iter::repeat('-').take(50).collect::<String>();
     println!("{}", divider);
     reader
         .lines()
