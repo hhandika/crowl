@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::iter;
 use std::path::Path;
 use std::process::Command;
 use std::str;
@@ -28,6 +29,8 @@ impl<'a> Md5<'a> {
     pub fn match_md5(&self) {
         let file_md5 = self.collect_md5();
         let input_md5 = self.parse_supplied_md5();
+        let divider = iter::repeat('-').take(50).collect::<String>();
+        println!("{}", divider);
         input_md5.iter().for_each(|(k, v)| {
             if let Some(md5) = file_md5.get(k) {
                 if md5 == v {
