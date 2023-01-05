@@ -7,4 +7,7 @@ edition = "2021"
 
 [dependencies]
 walkdir = "2.*"
-clap = { version = "3.*", features = ["cargo"] }
+clap = { version = "4.*", features = ["cargo", "derive"] }
+regex = "1.*"
+lazy_static = "1.*"
+glob = "0.*"
