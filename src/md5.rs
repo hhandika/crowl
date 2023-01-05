@@ -42,7 +42,11 @@ impl<'a> Md5<'a> {
         let failed_count = AtomicI32::new(0);
         let not_found_count = AtomicI32::new(0);
         paths.par_iter().for_each(|path| {
-            let md5 = self.check_md5(&path);
+            let md5 = if cfg!(windows) {
+                self.check_md5_windows(path)
+            } else {
+                self.check_md5(path)
+            };
 
             let fname = path.file_name().unwrap().to_string_lossy().to_string();
             if let Some(origin_md5) = origin_md5.get(&fname) {
@@ -74,6 +78,24 @@ impl<'a> Md5<'a> {
             not_found_count.load(std::sync::atomic::Ordering::Relaxed)
         );
         println!("DONE!");
+    }
+
+    fn check_md5_windows(&self, path: &Path) -> String {
+        let output = Command::new("certutil")
+            .arg("-hashfile")
+            .arg(path)
+            .arg("MD5")
+            .output()
+            .expect("Error: certutil not found");
+
+        match str::from_utf8(&output.stdout) {
+            Ok(s) => {
+                let md5 = s.lines().collect::<Vec<&str>>();
+                assert!(md5.len() > 1);
+                md5[1].to_string()
+            }
+            Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
+        }
     }
 
     fn check_md5(&self, path: &Path) -> String {
