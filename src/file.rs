@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
+use std::iter;
 use std::path::{Path, PathBuf};
 
 use walkdir::WalkDir;
@@ -9,7 +10,7 @@ pub fn parse_file(input: &Path) -> Vec<String> {
     let file = File::open(input).unwrap();
     let reader = BufReader::new(file);
     let mut lines = Vec::new();
-    let divider = str::repeat("-", 80);
+    let divider = iter::repeat('-').take(80).collect::<String>();
     println!("{}", divider);
     reader
         .lines()
