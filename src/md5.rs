@@ -73,7 +73,7 @@ impl<'a> Md5<'a> {
             "NOT FOUND",
             not_found_count.load(std::sync::atomic::Ordering::Relaxed)
         );
-        println!("DONE");
+        println!("DONE!");
     }
 
     fn check_md5(&self, path: &Path) -> String {
