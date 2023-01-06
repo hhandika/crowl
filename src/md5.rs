@@ -30,14 +30,16 @@ impl<'a> Md5<'a> {
 
     pub fn match_md5(&self) {
         let origin_md5 = self.parse_supplied_md5();
-        println!("MD5 supplied files: {}", origin_md5.len());
-        let divider = iter::repeat('-').take(50).collect::<String>();
-        println!("{}", divider);
+
         self.collect_md5(&origin_md5);
     }
 
     fn collect_md5(&self, origin_md5: &HashMap<String, String>) {
         let paths = file::find_files(&self.regex);
+        println!("Files founds: {}", paths.len());
+        println!("MD5 supplied files: {}", origin_md5.len());
+        let divider = iter::repeat('-').take(50).collect::<String>();
+        println!("{}", divider);
         let success_count = AtomicI32::new(0);
         let failed_count = AtomicI32::new(0);
         let not_found_count = AtomicI32::new(0);
@@ -80,7 +82,6 @@ impl<'a> Md5<'a> {
         println!("DONE!");
     }
 
-    #[cfg(windows)]
     fn check_md5_windows(&self, path: &Path) -> String {
         let output = Command::new("certutil.exe")
             .arg("-hashfile")
