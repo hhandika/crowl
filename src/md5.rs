@@ -80,6 +80,7 @@ impl<'a> Md5<'a> {
         println!("DONE!");
     }
 
+    #[cfg(windows)]
     fn check_md5_windows(&self, path: &Path) -> String {
         let output = Command::new("certutil.exe")
             .arg("-hashfile")
@@ -91,6 +92,7 @@ impl<'a> Md5<'a> {
         match str::from_utf8(&output.stdout) {
             Ok(s) => {
                 let md5 = s.lines().collect::<Vec<&str>>();
+                println!("{:?}", md5);
                 assert!(md5.len() > 1);
                 md5[1].to_string()
             }
